@@ -1,4 +1,4 @@
-// Project: Latch
+// Project: ResetLatch
 // Author: Erik Anderson
 // Date: 08/10/2019
 
@@ -6,27 +6,26 @@
 `timescale 1ns/1ps
 
 //---------------------------------------------------------
-// Module: Latch_tb
+// Module: ResetLatch_tb
 //---------------------------------------------------------
-module Latch_tb();
+module ResetLatch_tb();
 
 // Example parameter declaration
 parameter WIDTH = 8;
 
 // Example signal declaration 
-reg clk;
+reg clk, rst;
 reg [WIDTH-1:0] d;
 wire [WIDTH-1:0] q;
 
 // Example clock declaration 
-initial begin
-    clk = 1'b0;
-//    forever #(1) clk = !clk;
-end
+initial clk = 1'b0;
+initial rst = 1'b0;
 
 // Example DUT instantiaton
-Latch dut (
+ResetLatch dut (
   .io_clk(clk),
+  .io_rst(rst),
   .io_d(d),
   .io_q(q)
 );
@@ -57,6 +56,30 @@ initial begin
     #(1);
     pass &= (q == 1'b0);
     d = 1'b0;
+    // Transparent
+    clk = 1'b1;
+    d = 1'b1;
+    #(1);
+    pass &= (q == 1'b1);
+    // Transparent but reset
+    rst = 1'b1;
+    #(1);
+    pass &= (q == 1'b0);
+    // Transparent
+    rst = 1'b0;
+    clk = 1'b1;
+    d = 1'b1;
+    #(1);
+    pass &= (q == 1'b1);
+    // Nontransparent 
+    clk = 1'b0;
+    #(1);
+    pass &= (q == 1'b1);
+    // Nontransparent but reset
+    rst = 1'b1;
+    #(1);
+    pass &= (q == 1'b0);
+
     #(100);
     $display("#####################");
     if (pass)
