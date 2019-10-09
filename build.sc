@@ -20,7 +20,8 @@ trait CommonModule extends ScalaModule {
     // Enumerate Ivy dependencies
     def ivyDeps = Agg(
       ivy"edu.berkeley.cs::chisel3:3.2-SNAPSHOT",
-      ivy"edu.berkeley.cs::chisel-iotesters:1.3-SNAPSHOT"
+      ivy"edu.berkeley.cs::chisel-iotesters:1.3-SNAPSHOT",
+      ivy"net.jcazevedo::moultingyaml:0.4.1" 
     )
     
     // Add releases and snapshots repos
@@ -41,6 +42,13 @@ trait CommonModule extends ScalaModule {
 
 /** mems_switch_control module */
 object scan_generator extends CommonModule {
+  // Specify main class
+  //def mainClass = Some("scan_generator.Main")
+}
+
+/** mems_switch_control module */
+object verilog_test extends CommonModule {
+  def moduleDeps = Seq{scan_generator}
   // Specify main class
   //def mainClass = Some("scan_generator.Main")
 }

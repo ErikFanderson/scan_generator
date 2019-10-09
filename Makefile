@@ -3,13 +3,15 @@
 # Date: 10/08/2019
 
 module=scan_generator
+test_module=verilog_test
+config=example.yml
 
 .PHONY: default 
 default: run
 
 .PHONY: run 
 run:
-	mill $(module).run
+	mill $(module).run $(config)
 	mkdir -p generated/
 	mv *.f *.fir *.v *.anno.json generated/
 
@@ -19,7 +21,9 @@ compile:
 
 .PHONY: test 
 test:
-	mill $(module).test
+	mill $(test_module).run
+	mkdir -p generated/
+	mv *.f *.fir *.v *.anno.json generated/
 
 .PHONY: clean
 clean:
