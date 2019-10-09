@@ -2,7 +2,6 @@ package mems_switch_control
 import chisel3._
 import chisel3.util._
 import chisel3.experimental.IntParam
-import scala.math._
 
 ///////////////////////////////////////////////////////////
 // Black box latch w/o reset
