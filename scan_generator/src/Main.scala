@@ -1,4 +1,4 @@
-package mems_switch_control 
+package scan_generator 
 import chisel3._
 
 /** Elaborates Rx and Tx Top in a Top module */

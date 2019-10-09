@@ -1,4 +1,4 @@
-// Project: mems_switch_driver
+// Project: scan_generator 
 // Author: Erik Anderson
 // Date: 10/08/2019
 
@@ -40,7 +40,7 @@ trait CommonModule extends ScalaModule {
 }
 
 /** mems_switch_control module */
-object mems_switch_control extends CommonModule {
+object scan_generator extends CommonModule {
   // Specify main class
-  //def mainClass = Some("mems_switch_control.Main")
+  //def mainClass = Some("scan_generator.Main")
 }

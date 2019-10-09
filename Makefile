@@ -2,24 +2,24 @@
 # Author: Erik Anderson
 # Date: 10/08/2019
 
-pkg=mems_switch_control
+module=scan_generator
 
 .PHONY: default 
 default: run
 
 .PHONY: run 
 run:
-	mill $(pkg).run
+	mill $(module).run
 	mkdir -p generated/
 	mv *.f *.fir *.v *.anno.json generated/
 
 .PHONY: compile
 compile:
-	mill $(pkg).compile
+	mill $(module).compile
 
 .PHONY: test 
 test:
-	mill $(pkg).test
+	mill $(module).test
 
 .PHONY: clean
 clean:
