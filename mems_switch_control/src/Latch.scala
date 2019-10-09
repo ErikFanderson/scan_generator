@@ -37,12 +37,12 @@ with HasBlackBoxInline {
   })
   setInline("LatchBlackBox.v",
   s"""
-  |module LatchBlackBox #(WIDTH=1)(
+  |module LatchBlackBox #(parameter WIDTH=1)(
   |    input wire i_clk,
   |    input wire [WIDTH-1:0] i_d,  
-  |    output wire [WIDTH-1:0] o_q  
+  |    output reg [WIDTH-1:0] o_q  
   |);
-  |always @(clk) if (clk) o_q <= i_d; 
+  |always @(*) if (i_clk) o_q <= i_d; 
   |endmodule
   """.stripMargin)
 }
