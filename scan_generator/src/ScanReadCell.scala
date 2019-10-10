@@ -6,8 +6,8 @@ import chisel3.util._
 
 /** 2-phase Read Cell */
 object TwoPhaseScanReadCell {
-  def apply(width: Int): ScanReadCell = {
-    val p = ScanCellParameters(width=width,twoPhase=true,write=false,update=false,updateLatch=None) 
+  def apply(name: String, width: Int): ScanReadCell = {
+    val p = ScanCellParameters(name=name,width=width,twoPhase=true,write=false,update=false,updateLatch=None) 
     new ScanReadCell(p)
   }
 } 

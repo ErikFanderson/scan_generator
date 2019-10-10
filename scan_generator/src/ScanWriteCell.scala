@@ -6,8 +6,8 @@ import chisel3.util._
 
 /** 2-phase Write Cell w/ update */
 object TwoPhaseScanWriteCell {
-  def apply(width: Int): ScanWriteCell = {
-    val p = ScanCellParameters(width=width,twoPhase=true,write=true,update=true,updateLatch=Some(true)) 
+  def apply(name: String, width: Int): ScanWriteCell = {
+    val p = ScanCellParameters(name=name,width=width,twoPhase=true,write=true,update=true,updateLatch=Some(true)) 
     new ScanWriteCell(p)
   }
 } 

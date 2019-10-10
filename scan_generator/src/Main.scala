@@ -6,7 +6,7 @@ import net.jcazevedo.moultingyaml._
 
 object MyYamlProtocol extends DefaultYamlProtocol {
   implicit val scanCellTypeYamlFormat = yamlFormat3(ScanCellType)
-  implicit val scanCellInstanceYamlFormat = yamlFormat4(ScanCellInstance)
+  implicit val scanCellInstanceYamlFormat = yamlFormat4(ScanMultCellInstance)
   implicit val scanChainYamlFormat = yamlFormat4(ScanChainParameters)
 }
 
@@ -23,7 +23,8 @@ object MainScanGenerator extends App {
       bufferedSource.close
       val params = scanYaml.parseYaml.convertTo[ScanChainParameters] 
       // Create scan chain
-      val sg = new ScanChainGenerator(params)
+      //val sg = new ScanChainGenerator(params)
+      chisel3.Driver.execute(args,() => new ScanChainGenerator(params))
     } else {
       println(s"File ${args(0)} does not exist!")
     }

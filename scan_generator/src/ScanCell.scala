@@ -3,6 +3,7 @@ import chisel3._
 import chisel3.util._
 
 /** Parameters to ScanCell
+ *  @param name name of scan cell - Enables more advanced features
  *  @param width Number of flops inside scan chain cell
  *  @param twoPhase Determines whether registers or separate latches will be used to form cell
  *  @param write Determines whether cell is writeable 
@@ -10,6 +11,7 @@ import chisel3.util._
  *  @param updateLatch If "update" is true then this selects whether a register or a latch gates the output
  *  */
 case class ScanCellParameters (
+  name: String,
   width: Int,
   twoPhase: Boolean,
   write: Boolean,
@@ -21,7 +23,7 @@ case class ScanCellParameters (
  *  Description: Used as core for ScanReadCell and ScanWriteCell
  *  @param p ScanCellParameters. See defined case class
  *  */
- class ScanCell(p: ScanCellParameters) extends RawModule {
+ class ScanCell(val p: ScanCellParameters) extends RawModule {
   val io = IO(new Bundle(){
     // Scan in and out
     val scanIn = Input(Bool())

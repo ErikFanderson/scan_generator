@@ -12,8 +12,8 @@ object Main extends App {
   chisel3.Driver.execute(args,() => ResetLatch(width=8))
   
   // Generate Two phase Scan Write Cell 
-  chisel3.Driver.execute(args,() => TwoPhaseScanWriteCell(width=8))
+  chisel3.Driver.execute(args,() => TwoPhaseScanWriteCell(name="scan_write_test",width=8))
   
   // Generate Two phase Scan Write Cell 
-  chisel3.Driver.execute(args,() => TwoPhaseScanReadCell(width=8))
+  chisel3.Driver.execute(args,() => TwoPhaseScanReadCell(name="scan_read_test",width=8))
 }
