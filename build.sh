@@ -1,0 +1,1 @@
+mvn install:install-file -DgroupId=ErikFanderson -DartifactId=scan_generator -Dversion=0.0.1 -Dfile=scan_generator-0.0.1.jar -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=. -DcreateChecksum=true

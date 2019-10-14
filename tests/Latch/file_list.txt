@@ -1,3 +1,0 @@
-../../generated/Latch.v
-../../generated/LatchBlackBox.v
-Latch_tb.v

@@ -1,3 +1,0 @@
-../../generated/ResetLatch.v
-../../generated/ResetLatchBlackBox.v
-ResetLatch_tb.v
