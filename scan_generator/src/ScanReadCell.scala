@@ -25,11 +25,6 @@ class ScanReadCell(p: ScanCellParameters) extends Module{
   })
   require(!p.write,"Write is TRUE for ScanReadCell parameters!")
   val core = Module(new ScanCell(p))
-  core.io.scan.in := io.scan.in
-  io.scan.out := core.io.scan.out
-  core.io.scan.en := io.scan.en
+  core.io.scan <> io.scan
   core.io.cellIn.get := io.cellIn
-  if (!p.cellType.twoPhase) core.io.scan.clk.get := io.scan.clk.get 
-  if (p.cellType.twoPhase) core.io.scan.clkP.get := io.scan.clkP.get
-  if (p.cellType.twoPhase) core.io.scan.clkN.get := io.scan.clkN.get 
 }

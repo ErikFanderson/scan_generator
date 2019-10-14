@@ -12,7 +12,6 @@ import scala.collection.mutable.Map
 // TODO Create a map data structure for accessing cellIn and cellOut in chisel modules
 // TODO generate verilog tasks for testing scan chains  
 // TODO generate timing sdc commands   
-// TODO Take advantage of same gender connections between child and parent modules (scan)
 
 /** Scan Chain 
  *  Description: Connects scan chain cells to form scan chain elements 
@@ -33,7 +32,6 @@ class ScanChainGenerator(p: ScanChainParameters) extends RawModule {
     for (i <- 0 until c.mult) {
       // Populate name to Id maps 
       val name = s"${c.name}_$i"
-      println(s"Created cell: $name")
       if (c.write) { 
         require(!nameToIdOut.contains(name),s"Multiple write cells named $name")
         nameToIdOut += (name -> writeCtr); writeCtr += 1 
@@ -76,14 +74,8 @@ class ScanChainGenerator(p: ScanChainParameters) extends RawModule {
   writeCtr = 0
   // Connect scan cells
   cells.zipWithIndex.foreach{ case(c,i) => {
-    // Connect clocks
-    if (p.cellType.twoPhase) {
-      c.io.scan.clkP.get := io.scan.clkP.get
-      c.io.scan.clkN.get := io.scan.clkN.get
-    } else {
-      c.io.scan.clk.get := io.scan.clk.get
-    }
-    // Connect in/out 
+    c.io.scan.control <> io.scan.control
+    // Connect cell in/out 
     if (c.p.write) {
       io.out.get(writeCtr) := c.io.cellOut.get
       writeCtr += 1 
@@ -91,10 +83,6 @@ class ScanChainGenerator(p: ScanChainParameters) extends RawModule {
       c.io.cellIn.get := io.in.get(readCtr)
       readCtr += 1 
     }
-    // Connect control
-    c.io.scan.en := io.scan.en
-    if (p.cellType.update) c.io.scan.update.get := io.scan.update.get
-    if (p.cellType.update) c.io.scan.reset.get := io.scan.reset.get
     // Connect scan in and out
     if (i == 0) { 
       c.io.scan.in := io.scan.in 
