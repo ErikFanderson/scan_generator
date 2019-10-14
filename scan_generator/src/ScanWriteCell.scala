@@ -7,7 +7,12 @@ import chisel3.util._
 /** 2-phase Write Cell w/ update */
 object TwoPhaseScanWriteCell {
   def apply(name: String, width: Int): ScanWriteCell = {
-    val p = ScanCellParameters(name=name,width=width,twoPhase=true,write=true,update=true,updateLatch=Some(true)) 
+    val p = ScanCellParameters(
+      name=name,
+      width=width,
+      cellType = new ScanCellType(twoPhase=true,update=true,updateLatch=Some(true)),
+      write=true
+    ) 
     new ScanWriteCell(p)
   }
 } 
@@ -15,25 +20,18 @@ object TwoPhaseScanWriteCell {
 /** ScanWriteCell variant of ScanCell */
 class ScanWriteCell(p: ScanCellParameters) extends Module{
   val io = IO(new Bundle(){
-    val scanIn = Input(Bool())
-    val scanOut = Output(Bool())
-    val scanEn = Input(Bool())
+    val scan = new ScanIOs(p.cellType)
     val cellOut = Output(UInt(p.width.W))
-    val scanClk = if (!p.twoPhase) Some(Input(Clock())) else None
-    val scanClkP = if (p.twoPhase) Some(Input(Clock())) else None
-    val scanClkN = if (p.twoPhase) Some(Input(Clock())) else None
-    val scanUpdate = if (p.update) Some(Input(Bool())) else None
-    val scanReset = if (p.update) Some(Input(Bool())) else None
   })
   require(p.write,"Write is FALSE for ScanWriteCell parameters!")
   val core = Module(new ScanCell(p))
-  core.io.scanIn := io.scanIn
-  io.scanOut := core.io.scanOut
-  core.io.scanEn := io.scanEn
+  core.io.scan.in := io.scan.in
+  io.scan.out := core.io.scan.out
+  core.io.scan.en := io.scan.en
   io.cellOut := core.io.cellOut.get
-  if (!p.twoPhase) core.io.scanClk.get := io.scanClk.get 
-  if (p.twoPhase) core.io.scanClkP.get := io.scanClkP.get
-  if (p.twoPhase) core.io.scanClkN.get := io.scanClkN.get 
-  if (p.update) core.io.scanUpdate.get := io.scanUpdate.get 
-  if (p.update) core.io.scanReset.get := io.scanReset.get 
+  if (!p.cellType.twoPhase) core.io.scan.clk.get := io.scan.clk.get 
+  if (p.cellType.twoPhase) core.io.scan.clkP.get := io.scan.clkP.get
+  if (p.cellType.twoPhase) core.io.scan.clkN.get := io.scan.clkN.get 
+  if (p.cellType.update) core.io.scan.update.get := io.scan.update.get 
+  if (p.cellType.update) core.io.scan.reset.get := io.scan.reset.get 
 }

@@ -5,11 +5,15 @@ cellType:
 output_fname_chain: "output_chain"
 output_fname_defs: "output_defs"
 cells:
-- name: "test_cell1"
+- name: "test_cellw1"
   width: 32
   mult: 1
   write: true
-- name: "test_cell2"
+- name: "test_cellw2"
+  width: 32
+  mult: 1
+  write: true
+- name: "test_cellr2"
   width: 8 
   mult: 2 
   write: false 

@@ -5,40 +5,14 @@ import net.jcazevedo.moultingyaml._
 import scala.io.Source
 import java.nio.file.{Paths, Files}
 import scala.collection.mutable.ListBuffer
-
+import scala.collection.mutable.Map
 
 // TODO Add CLI parser 
 // TODO Generate definitions in verilog
 // TODO Create a map data structure for accessing cellIn and cellOut in chisel modules
 // TODO generate verilog tasks for testing scan chains  
 // TODO generate timing sdc commands   
-// TODO implement mult   
-
-///////////////////////////////////////////////////////////
-// Define YAML schema
-///////////////////////////////////////////////////////////
-/** Define type of scan cells to be used */
-case class ScanCellType (
-  twoPhase: Boolean,
-  update: Boolean,
-  updateLatch: Option[Boolean]
-)
-
-/** Define instances w/ mult */
-case class ScanMultCellInstance (
-  name: String,
-  width: Int,
-  mult: Int,
-  write: Boolean
-)
-
-/** Define entire scan chain */
-case class ScanChainParameters (
-  cellType: ScanCellType,
-  output_fname_chain: String,
-  output_fname_defs: Option[String],
-  cells: Seq[ScanMultCellInstance]
-)
+// TODO Take advantage of same gender connections between child and parent modules (scan)
 
 /** Scan Chain 
  *  Description: Connects scan chain cells to form scan chain elements 
@@ -46,86 +20,104 @@ case class ScanChainParameters (
  *  */
 class ScanChainGenerator(p: ScanChainParameters) extends RawModule {
   
-  ///////////////////////////////////////////////////////
+  //-------------------------------------------------------
   // Create all cells
-  ///////////////////////////////////////////////////////
+  //-------------------------------------------------------
   private val cells: ListBuffer[ScanCell] = ListBuffer() 
+  private val nameToIdOut: Map[String,Int] = Map()
+  private val nameToIdIn: Map[String,Int] = Map()
+  private var readCtr = 0
+  private var writeCtr = 0
   p.cells.foreach(c => {
     // Iterate over mult
     for (i <- 0 until c.mult) {
-      println(s"Created cell: ${c.name}_$i")
+      // Populate name to Id maps 
+      val name = s"${c.name}_$i"
+      println(s"Created cell: $name")
+      if (c.write) { 
+        require(!nameToIdOut.contains(name),s"Multiple write cells named $name")
+        nameToIdOut += (name -> writeCtr); writeCtr += 1 
+      } else { 
+        require(!nameToIdIn.contains(name),s"Multiple read cells named $name")
+        nameToIdIn += (name -> readCtr); readCtr += 1 
+      }
+      // Create cell
       cells += Module(new ScanCell(new ScanCellParameters(
-          name = s"${c.name}_$i",
+          name = s"$name",
           width=c.width,
-          twoPhase=p.cellType.twoPhase,
-          write=c.write,
-          update=p.cellType.update,
-          updateLatch= p.cellType.updateLatch
+          cellType = p.cellType,
+          write=c.write
       )))
     }
   })
-  
-  ///////////////////////////////////////////////////////
+
+  //-------------------------------------------------------
   // Calculate IO widths and filter cells
-  ///////////////////////////////////////////////////////
+  //-------------------------------------------------------
   val writeCells = cells.filter(x => x.p.write == true)
   val readCells = cells.filter(x => x.p.write == false)
   val outWidth = writeCells.map(x => x.p.width).fold(0)((a,b) => a + b)
   val inWidth = readCells.map(x => x.p.width).fold(0)((a,b) => a + b)
-    
-  ///////////////////////////////////////////////////////
+  
+  //-------------------------------------------------------
   // IO declaration 
-  ///////////////////////////////////////////////////////
+  //-------------------------------------------------------
   val io = IO(new Bundle(){
-    // Scan in and out
-    val scanIn = Input(Bool())
-    val scanOut = Output(Bool())
-    // Parallel in and out
+    val scan = new ScanIOs(p.cellType) 
     val out = if (outWidth != 0) Some(Output(MixedVec(writeCells.map(c => UInt(c.p.width.W))))) else None
     val in = if (inWidth != 0) Some(Input(MixedVec(readCells.map(c => UInt(c.p.width.W))))) else None
-    // Reset - resets the output stage only
-    val scanReset = if (p.cellType.update) Some(Input(Bool())) else None
-    // Clocks 
-    val scanClk = if (!p.cellType.twoPhase) Some(Input(Clock())) else None
-    val scanClkP = if (p.cellType.twoPhase) Some(Input(Clock())) else None
-    val scanClkN = if (p.cellType.twoPhase) Some(Input(Clock())) else None
-    // Control Signals
-    val scanEn = Input(Bool())
-    val scanUpdate = if (p.cellType.update) Some(Input(Bool())) else None
   })
 
-  ///////////////////////////////////////////////////////
+  //-------------------------------------------------------
   // Connect all cells
-  ///////////////////////////////////////////////////////
-  var readCtr = 0
-  var writeCtr = 0
+  //-------------------------------------------------------
+  // Re-init read and write counters
+  readCtr = 0
+  writeCtr = 0
   // Connect scan cells
   cells.zipWithIndex.foreach{ case(c,i) => {
     // Connect clocks
     if (p.cellType.twoPhase) {
-      c.io.scanClkP.get := io.scanClkP.get
-      c.io.scanClkN.get := io.scanClkN.get
+      c.io.scan.clkP.get := io.scan.clkP.get
+      c.io.scan.clkN.get := io.scan.clkN.get
     } else {
-      c.io.scanClk.get := io.scanClk.get
+      c.io.scan.clk.get := io.scan.clk.get
     }
     // Connect in/out 
     if (c.p.write) {
-      io.out.get(writeCtr) := c.io.cellOut.get // SUB-WORD ASSIGNMENT!
+      io.out.get(writeCtr) := c.io.cellOut.get
       writeCtr += 1 
     } else {
       c.io.cellIn.get := io.in.get(readCtr)
       readCtr += 1 
     }
     // Connect control
-    c.io.scanEn := io.scanEn
-    if (p.cellType.update) c.io.scanUpdate.get := io.scanUpdate.get
-    if (p.cellType.update) c.io.scanReset.get := io.scanReset.get
+    c.io.scan.en := io.scan.en
+    if (p.cellType.update) c.io.scan.update.get := io.scan.update.get
+    if (p.cellType.update) c.io.scan.reset.get := io.scan.reset.get
     // Connect scan in and out
     if (i == 0) { 
-      c.io.scanIn := io.scanIn 
+      c.io.scan.in := io.scan.in 
     } else {
-      c.io.scanIn := cells(i-1).io.scanOut
-      if (i == cells.length-1) io.scanOut := c.io.scanOut
+      c.io.scan.in := cells(i-1).io.scan.out
+      if (i == cells.length-1) io.scan.out := c.io.scan.out
     }
   }}
+
+  //-------------------------------------------------------
+  // Functions for returning read/in IOs and write/out IOs 
+  //-------------------------------------------------------
+  /** Returns the out port so you can assign something else to the out value 
+   *  @param name name_i where name is name of yml and i is mult number
+   *  */
+  def outIO(name: String) = {
+    io.out.get(nameToIdOut(name))
+  }
+  
+  /** Returns the in port so you can assign to it
+   *  @param name name_i where name is name of yml and i is mult number
+   *  */
+  def inIO(name: String) = {
+    io.in.get(nameToIdIn(name))
+  }
 }

@@ -7,29 +7,29 @@ import chisel3.util._
 /** 2-phase Read Cell */
 object TwoPhaseScanReadCell {
   def apply(name: String, width: Int): ScanReadCell = {
-    val p = ScanCellParameters(name=name,width=width,twoPhase=true,write=false,update=false,updateLatch=None) 
+    val p = ScanCellParameters(
+      name=name,
+      width=width,
+      cellType = new ScanCellType(twoPhase=true,update=false,updateLatch=None),
+      write=false
+    ) 
     new ScanReadCell(p)
   }
-} 
+}
 
 /** ScanReadCell variant of ScanCell */
 class ScanReadCell(p: ScanCellParameters) extends Module{
   val io = IO(new Bundle(){
-    val scanIn = Input(Bool())
-    val scanOut = Output(Bool())
-    val scanEn = Input(Bool())
+    val scan = new ScanIOs(p.cellType)
     val cellIn = Input(UInt(p.width.W))
-    val scanClk = if (!p.twoPhase) Some(Input(Clock())) else None
-    val scanClkP = if (p.twoPhase) Some(Input(Clock())) else None
-    val scanClkN = if (p.twoPhase) Some(Input(Clock())) else None
   })
   require(!p.write,"Write is TRUE for ScanReadCell parameters!")
   val core = Module(new ScanCell(p))
-  core.io.scanIn := io.scanIn
-  io.scanOut := core.io.scanOut
-  core.io.scanEn := io.scanEn
+  core.io.scan.in := io.scan.in
+  io.scan.out := core.io.scan.out
+  core.io.scan.en := io.scan.en
   core.io.cellIn.get := io.cellIn
-  if (!p.twoPhase) core.io.scanClk.get := io.scanClk.get 
-  if (p.twoPhase) core.io.scanClkP.get := io.scanClkP.get
-  if (p.twoPhase) core.io.scanClkN.get := io.scanClkN.get 
+  if (!p.cellType.twoPhase) core.io.scan.clk.get := io.scan.clk.get 
+  if (p.cellType.twoPhase) core.io.scan.clkP.get := io.scan.clkP.get
+  if (p.cellType.twoPhase) core.io.scan.clkN.get := io.scan.clkN.get 
 }
