@@ -17,7 +17,7 @@ import scala.collection.mutable.Map
  *  Description: Connects scan chain cells to form scan chain elements 
  *  @param p ScanCellParameters. See defined case class
  *  */
-class ScanChainGenerator(p: ScanChainParameters) extends RawModule {
+class ScanChain(p: ScanChainParameters) extends RawModule {
   
   //-------------------------------------------------------
   // Create all cells
