@@ -4,13 +4,13 @@ import scala.io.Source
 import java.nio.file.{Paths, Files}
 import net.jcazevedo.moultingyaml._
 
-object MyYamlProtocol extends DefaultYamlProtocol {
+object ScanChainYamlProtocol extends DefaultYamlProtocol {
   implicit val scanCellTypeYamlFormat = yamlFormat3(ScanCellType)
   implicit val scanCellInstanceYamlFormat = yamlFormat4(ScanMultCellInstance)
   implicit val scanChainYamlFormat = yamlFormat4(ScanChainParameters)
 }
 
-import MyYamlProtocol._
+import ScanChainYamlProtocol._
 
 object MainScanGenerator extends App {
   if (args.length == 0) {
