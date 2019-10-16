@@ -1,0 +1,5 @@
+ScanWriteCell_tb.v
+../../generated/ScanWriteCell.v
+../../generated/LatchBlackBox.v
+../../generated/ResetLatchBlackBox.v
+../../../../verilog/two_phase_clock_generator/two_phase_clock_generator.v
