@@ -74,7 +74,7 @@ class ScanIOs(p: ScanCellType) extends Bundle {
       if (p.write) negLatch.get.io.d := Mux(en,Cat(posLatch.get.io.q(p.width-2,0),scanIn),io.cellOut.get)
       else negLatch.get.io.d := Mux(en,Cat(posLatch.get.io.q(p.width-2,0),scanIn),io.cellIn.get)
     }
-    posLatch.get.io.d := negLatch.get.io.d 
+    posLatch.get.io.d := negLatch.get.io.q
   }
   
   //-------------------------------------------------------
