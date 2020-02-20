@@ -19,6 +19,10 @@ run:
 compile:
 	mill $(module).compile
 
+.PHONY: assembly 
+assembly:
+	mill $(module).assembly
+
 .PHONY: test 
 test:
 	mill $(test_module).run
