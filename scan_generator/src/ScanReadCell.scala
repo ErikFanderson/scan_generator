@@ -18,7 +18,7 @@ object TwoPhaseScanReadCell {
 }
 
 /** ScanReadCell variant of ScanCell */
-class ScanReadCell(p: ScanCellParameters) extends Module{
+class ScanReadCell(p: ScanCellParameters) extends RawModule{
   val io = IO(new Bundle(){
     val scan = new ScanIOs(p.cellType)
     val cellIn = Input(UInt(p.width.W))

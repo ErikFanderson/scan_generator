@@ -11,25 +11,25 @@ default: run
 
 .PHONY: run 
 run:
-	mill $(module).run $(config)
+	./mill $(module).run $(config)
 	mkdir -p generated/
 	mv *.f *.fir *.v *.anno.json generated/
 
 .PHONY: compile
 compile:
-	mill $(module).compile
+	./mill $(module).compile
 
 .PHONY: assembly 
 assembly:
-	mill $(module).assembly
+	./mill $(module).assembly
 
 .PHONY: test 
 test:
-	mill $(test_module).run
+	./mill $(test_module).run
 	mkdir -p generated/
 	mv *.f *.fir *.v *.anno.json generated/
 
 .PHONY: clean
 clean:
-	mill clean
+	./mill clean
 	rm -rf *.anno.json *.fir *.v generated/ out/ test_run_dir/

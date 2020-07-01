@@ -18,7 +18,7 @@ object TwoPhaseScanWriteCell {
 } 
 
 /** ScanWriteCell variant of ScanCell */
-class ScanWriteCell(p: ScanCellParameters) extends Module{
+class ScanWriteCell(p: ScanCellParameters) extends RawModule{
   val io = IO(new Bundle(){
     val scan = new ScanIOs(p.cellType)
     val cellOut = Output(UInt(p.width.W))
